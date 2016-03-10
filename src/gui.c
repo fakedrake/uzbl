@@ -53,7 +53,7 @@ struct _UzblGui {
 static void
 status_bar_init ();
 static void
-web_view_init ();
+web_view_init (WebKitWebContext *ctx);
 static void
 vbox_init ();
 static void
@@ -65,12 +65,12 @@ static void
 uzbl_input_commit_cb (GtkIMContext *context, const gchar *str, gpointer data);
 
 void
-uzbl_gui_init ()
+uzbl_gui_init (WebKitWebContext *context)
 {
     uzbl.gui_ = g_malloc0 (sizeof (UzblGui));
 
     status_bar_init ();
-    web_view_init ();
+    web_view_init (context);
     vbox_init ();
 
     if (uzbl.state.plug_mode) {
@@ -259,21 +259,23 @@ static gboolean
 scroll_horiz_cb (GtkAdjustment *adjust, gpointer data);
 
 void
-web_view_init ()
+web_view_init (WebKitWebContext *context)
 {
 #if WEBKIT_CHECK_VERSION (2, 5, 1)
     uzbl.gui_->user_manager = webkit_user_content_manager_new ();
-    uzbl.gui.web_view = WEBKIT_WEB_VIEW (webkit_web_view_new_with_user_content_manager(uzbl.gui_->user_manager));
-#else
-    uzbl.gui.web_view = WEBKIT_WEB_VIEW (webkit_web_view_new ());
 #endif
+    uzbl.gui.web_view = WEBKIT_WEB_VIEW (g_object_new (WEBKIT_TYPE_WEB_VIEW,
+        "web-context", context,
+#if WEBKIT_CHECK_VERSION (2, 5, 1)
+        "user-content-manager", uzbl.gui_->user_manager,
+#endif
+        NULL));
     uzbl.gui.scrolled_win = gtk_scrolled_window_new (NULL, NULL);
 
     gtk_container_add (
         GTK_CONTAINER (uzbl.gui.scrolled_win),
         GTK_WIDGET (uzbl.gui.web_view));
 
-    WebKitWebContext *context = webkit_web_view_get_context (uzbl.gui.web_view);
     g_object_connect (G_OBJECT (context),
         "signal::download-started",                     G_CALLBACK (download_cb),              NULL,
         "signal::initialize-web-extensions",            G_CALLBACK (extension_cb),             NULL,
