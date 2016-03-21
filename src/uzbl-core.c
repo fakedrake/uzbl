@@ -203,33 +203,6 @@ uzbl_init (int *argc, char ***argv)
     }
 #endif
 
-    WebKitWebContext *webkit_context;
-#if WEBKIT_CHECK_VERSION (2, 9, 4)
-    WebKitWebsiteDataManager *data_manager = webkit_website_data_manager_new (
-        "base-cache-directory", cache_dir,
-        "base-data-directory", data_dir,
-        NULL);
-    webkit_context = webkit_web_context_new_with_website_data_manager (data_manager);
-#else
-    webkit_context = webkit_web_context_get_default ();
-#endif
-
-    /* Use this in the hopes that one day uzbl itself can be multi-threaded. */
-    WebKitProcessModel model =
-#if WEBKIT_CHECK_VERSION (2, 3, 90)
-        WEBKIT_PROCESS_MODEL_MULTIPLE_SECONDARY_PROCESSES
-#else
-        WEBKIT_PROCESS_MODEL_ONE_SECONDARY_PROCESS_PER_WEB_VIEW
-#endif
-        ;
-    /* TODO: expose command line option for this. */
-    webkit_web_context_set_process_model (webkit_context, model);
-#if WEBKIT_CHECK_VERSION (2, 9, 4)
-    /* TODO: expose command line option for this. */
-    webkit_web_context_set_web_process_count_limit (webkit_context, 0);
-#endif
-    webkit_web_context_set_web_extensions_directory (webkit_context, uzbl.state.web_extensions_directory);
-
     uzbl_io_init ();
     uzbl_js_init ();
     uzbl_variables_init ();
@@ -238,7 +211,7 @@ uzbl_init (int *argc, char ***argv)
     uzbl_requests_init ();
 
     /* Initialize the GUI. */
-    uzbl_gui_init (webkit_context);
+    uzbl_gui_init (cache_dir, data_dir, uzbl.state.web_extensions_directory);
     uzbl_inspector_init ();
 
     /* Uzbl has now been started. */

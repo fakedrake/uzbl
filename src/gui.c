@@ -52,6 +52,10 @@ struct _UzblGui {
 
 static void
 status_bar_init ();
+static WebKitWebContext*
+create_web_context (const gchar *cache_dir,
+                    const gchar *data_dir,
+                    const gchar *web_extensions_dir);
 static void
 web_view_init (WebKitWebContext *ctx);
 static void
@@ -65,11 +69,14 @@ static void
 uzbl_input_commit_cb (GtkIMContext *context, const gchar *str, gpointer data);
 
 void
-uzbl_gui_init (WebKitWebContext *context)
+uzbl_gui_init (const gchar *cache_dir,
+               const gchar *data_dir,
+               const gchar *web_extensions_dir)
 {
     uzbl.gui_ = g_malloc0 (sizeof (UzblGui));
 
     status_bar_init ();
+    WebKitWebContext *context = create_web_context(cache_dir, data_dir, web_extensions_dir);
     web_view_init (context);
     vbox_init ();
 
@@ -186,6 +193,41 @@ status_bar_init ()
         "signal::key-release-event", G_CALLBACK (key_release_cb), NULL,
         NULL);
       */
+}
+
+WebKitWebContext*
+create_web_context (const gchar *cache_dir,
+                    const gchar *data_dir,
+                    const gchar *web_extensions_dir)
+{
+    WebKitWebContext *webkit_context;
+#if WEBKIT_CHECK_VERSION (2, 9, 4)
+    WebKitWebsiteDataManager *data_manager = webkit_website_data_manager_new (
+        "base-cache-directory", cache_dir,
+        "base-data-directory", data_dir,
+        NULL);
+    webkit_context = webkit_web_context_new_with_website_data_manager (data_manager);
+#else
+    webkit_context = webkit_web_context_get_default ();
+#endif
+
+    /* Use this in the hopes that one day uzbl itself can be multi-threaded. */
+    WebKitProcessModel model =
+#if WEBKIT_CHECK_VERSION (2, 3, 90)
+        WEBKIT_PROCESS_MODEL_MULTIPLE_SECONDARY_PROCESSES
+#else
+        WEBKIT_PROCESS_MODEL_ONE_SECONDARY_PROCESS_PER_WEB_VIEW
+#endif
+        ;
+    /* TODO: expose command line option for this. */
+    webkit_web_context_set_process_model (webkit_context, model);
+#if WEBKIT_CHECK_VERSION (2, 9, 4)
+    /* TODO: expose command line option for this. */
+    webkit_web_context_set_web_process_count_limit (webkit_context, 0);
+#endif
+    webkit_web_context_set_web_extensions_directory (webkit_context, web_extensions_dir);
+
+    return webkit_context;
 }
 
 /* Mouse events */

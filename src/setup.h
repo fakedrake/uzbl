@@ -1,8 +1,6 @@
 #ifndef UZBL_SETUP_H
 #define UZBL_SETUP_H
 
-typedef struct _WebKitWebContext WebKitWebContext;
-
 void
 uzbl_commands_init ();
 void
@@ -17,7 +15,9 @@ void
 uzbl_events_free ();
 
 void
-uzbl_gui_init (WebKitWebContext *context);
+uzbl_gui_init (const gchar *cache_dir,
+               const gchar *data_dir,
+               const gchar *web_extensions_dir);
 void
 uzbl_gui_free ();
 
