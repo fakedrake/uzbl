@@ -188,7 +188,7 @@ clean:
 	rm -f libuzbl.a
 	rm -rf ./sandbox/
 	find ./examples/ -name "*.pyc" -delete || :
-	find -name __pycache__ -type d -exec rm -rf '{}' \; || :
+	find .  -name __pycache__ -type d -exec rm -rf '{}' \; || :
 	$(PYTHON) setup.py clean
 
 strip:
