@@ -192,10 +192,12 @@ uzbl_init (int *argc, char ***argv)
         exit (EXIT_SUCCESS);
     }
 
+    #ifndef QUARTZ
     /* Embedded mode. */
     if (uzbl.state.xembed_socket_id) {
         uzbl.state.plug_mode = TRUE;
     }
+    #endif
 
 #if !GLIB_CHECK_VERSION (2, 31, 0)
     if (!g_thread_supported ()) {
@@ -271,11 +273,13 @@ uzbl_init (int *argc, char ***argv)
     }
 #endif
 
+#ifndef QUARTZ
     if (uzbl.state.plug_mode) {
         uzbl_events_send (PLUG_CREATED, NULL,
             TYPE_INT, gtk_plug_get_id (uzbl.gui.plug),
             NULL);
     }
+#endif
 
     /* Navigate to a URI if requested. */
     if (uri) {
@@ -296,9 +300,12 @@ uzbl_init (int *argc, char ***argv)
     /* Finally show the window */
     if (uzbl.gui.main_window) {
         gtk_widget_show_all (uzbl.gui.main_window);
-    } else {
+    }
+#ifndef QUARTZ
+    else {
         gtk_widget_show_all (GTK_WIDGET (uzbl.gui.plug));
     }
+#endif
 
     /* Apply the show_status variable. All widgets are shown with the above
      * call. Unfortunately, GTK has the wonderful thing where all widgets must
@@ -356,6 +363,7 @@ main (int argc, char *argv[])
     /* Verbose feedback. */
     if (uzbl_variables_get_int ("verbose")) {
         printf ("Uzbl start location: %s\n", argv[0]);
+#ifndef QUARTZ
         if (uzbl.state.xembed_socket_id) {
             printf ("plug_id %d\n", (int)gtk_plug_get_id (uzbl.gui.plug));
         } else {
@@ -363,6 +371,7 @@ main (int argc, char *argv[])
 
             printf ("window_id %d\n", (int)xwin);
         }
+#endif
         printf ("pid %i\n", getpid ());
         printf ("name: %s\n", uzbl.state.instance_name);
         gchar *commit = uzbl_variables_get_string ("COMMIT");

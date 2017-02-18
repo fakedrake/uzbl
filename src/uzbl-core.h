@@ -13,7 +13,9 @@
 typedef struct {
     /* Window */
     GtkWidget     *main_window;
+#ifndef QUARTZ
     GtkPlug       *plug;
+#endif
     GtkWidget     *scrolled_win;
     GtkWidget     *vbox;
 
@@ -41,7 +43,9 @@ typedef struct {
     char           *instance_name;
     gchar          *selected_url;
     gchar          *last_result;
+    #ifndef QUARTZ
     gboolean        plug_mode;
+    #endif
     JSGlobalContextRef jscontext;
 
     gboolean        started;

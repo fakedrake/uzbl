@@ -22,7 +22,7 @@ PYTHON  ?= python3
 
 REQ_PKGS += 'webkit2gtk-4.0 >= 2.3.5' javascriptcoregtk-4.0
 
-REQ_PKGS += gtk+-3.0
+REQ_PKGS += gdk-quartz-3.0 gio-2.0 glib-2.0
 CPPFLAGS += -DG_DISABLE_DEPRECATED
 # WebKitGTK uses deprecated features, so uzbl can't blanket this out.
 #CPPFLAGS += -DGTK_DISABLE_DEPRECATED
@@ -44,7 +44,7 @@ REQ_PKGS += gnutls
 
 PKG_CFLAGS := $(shell pkg-config --cflags $(REQ_PKGS))
 
-LDLIBS := $(shell pkg-config --libs $(REQ_PKGS) x11)
+LDLIBS := $(shell pkg-config --libs $(REQ_PKGS))
 
 CFLAGS += -std=c99 $(PKG_CFLAGS) -ggdb -W -Wall -Wextra -pthread -Wunused-function
 
@@ -110,7 +110,7 @@ libuzbl.a: ${OBJ}
 uzbl-core: libuzbl.a
 
 uzbl-ext.so: ${EXTOBJ}
-	$(CC) -shared -fPIC $^ -o $@
+	$(CC) $(LDLIBS) -shared -fPIC $^ -o $@
 
 uzbl-browser: uzbl-core uzbl-ext.so uzbl-event-manager uzbl-browser.1 uzbl-core.desktop uzbl-tabbed.desktop bin/uzbl-browser
 
@@ -272,11 +272,11 @@ install-uzbl-tabbed: install-dirs
 
 # you probably only want to do this manually when testing and/or to the sandbox. not meant for distributors
 install-example-data:
-	$(INSTALL) -d $(DESTDIR)/home/.config/uzbl
-	$(INSTALL) -d $(DESTDIR)/home/.cache/uzbl
-	$(INSTALL) -d $(DESTDIR)/home/.local/share/uzbl
-	cp -rp examples/config/* $(DESTDIR)/home/.config/uzbl/
-	cp -rp examples/data/*   $(DESTDIR)/home/.local/share/uzbl/
+	$(INSTALL) -d $(HOME)/.config/uzbl
+	$(INSTALL) -d $(HOME)/.cache/uzbl
+	$(INSTALL) -d $(HOME)/.local/share/uzbl
+	cp -rp examples/config/* $(HOME)/.config/uzbl/
+	cp -rp examples/data/*   $(HOME)/.local/share/uzbl/
 
 uninstall:
 	rm -rf $(INSTALLDIR)/bin/uzbl-*

@@ -1411,6 +1411,8 @@ IMPLEMENT_COMMAND (geometry)
 
         /* We used to use gtk_window_parse_geometry () but that didn't work how
          * it was supposed to. */
+        /* drninjabatman: If that is true, you are now assuming we have Xorg */
+#ifndef QUARTZ
         int ret = XParseGeometry (geometry, &x, &y, &w, &h);
 
         if (ret & XValue) {
@@ -1420,6 +1422,9 @@ IMPLEMENT_COMMAND (geometry)
         if (ret & WidthValue) {
             gtk_window_resize (GTK_WINDOW (uzbl.gui.main_window), w, h);
         }
+#else
+        gtk_window_parse_geometry(uzbl.gui.main_window, geometry);
+#endif
     }
 }
 
@@ -2507,9 +2512,10 @@ IMPLEMENT_COMMAND (exit)
      * non-response window in the cleanup steps. */
     if (uzbl.gui.main_window) {
         gtk_widget_destroy (uzbl.gui.main_window);
-    } else if (uzbl.gui.plug) {
-        gtk_widget_destroy (GTK_WIDGET (uzbl.gui.plug));
     }
+    /* else if (uzbl.gui.plug) { */
+    /*     gtk_widget_destroy (GTK_WIDGET (uzbl.gui.plug)); */
+    /* } */
 
     if (uzbl.state.gtk_started) {
         gtk_main_quit ();

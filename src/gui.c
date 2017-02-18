@@ -81,9 +81,12 @@ uzbl_gui_init (const gchar *cache_dir,
     web_view_init (context);
     vbox_init ();
 
+#ifndef QUARTZ
     if (uzbl.state.plug_mode) {
         plug_init ();
-    } else {
+    } else
+#endif
+    {
         window_init ();
     }
 
@@ -161,8 +164,11 @@ uzbl_gui_update_title ()
 
     /* Update window title. */
     /* If we're starting up or shutting down there might not be a window yet. */
+#ifndef QUARTZ
     gboolean have_main_window = !uzbl.state.plug_mode && GTK_IS_WINDOW (uzbl.gui.main_window);
-    if (title_format && have_main_window) {
+    if (title_format && have_main_window)
+#endif
+    {
         uzbl_variables_expand_async (title_format,
                                      update_title_expand_title_cb,
                                      title_format);
@@ -498,6 +504,7 @@ window_init ()
     }
 }
 
+#ifndef QUARTZ
 void
 plug_init ()
 {
@@ -514,6 +521,7 @@ plug_init ()
         "signal::key-release-event", G_CALLBACK (key_release_cb), NULL,
         NULL);
 }
+#endif
 
 static guint
 key_to_modifier (guint keyval);

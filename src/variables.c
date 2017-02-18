@@ -1523,7 +1523,9 @@ uzbl_variables_private_new (GHashTable *table)
         { "indexed_db_directory",         UZBL_C_FUNC (indexed_db_directory,                   STR)},
 #endif
         { "uri",                          UZBL_C_STRING (uzbl.state.uri)},
+#ifndef QUARTZ
         { "embedded",                     UZBL_C_INT (uzbl.state.plug_mode)},
+#endif
         { "WEBKIT_MAJOR",                 UZBL_C_FUNC (WEBKIT_MAJOR,                           INT)},
         { "WEBKIT_MINOR",                 UZBL_C_FUNC (WEBKIT_MINOR,                           INT)},
         { "WEBKIT_MICRO",                 UZBL_C_FUNC (WEBKIT_MICRO,                           INT)},
@@ -1820,9 +1822,11 @@ IMPLEMENT_SETTER (int, status_top)
     g_object_unref (uzbl.gui.scrolled_win);
     g_object_unref (uzbl.gui.status_bar);
 
+#ifndef QUARTZ
     if (!uzbl.state.plug_mode) {
         gtk_widget_grab_focus (GTK_WIDGET (uzbl.gui.web_view));
     }
+#endif
 
     return TRUE;
 }
@@ -1832,7 +1836,11 @@ IMPLEMENT_SETTER (char *, status_background)
     /* Labels and hboxes do not draw their own background. Applying this on the
      * vbox/main_window is ok as the statusbar is the only affected widget. If
      * not, we could also use GtkEventBox. */
+#ifndef QUARTZ
     GtkWidget *widget = uzbl.gui.main_window ? uzbl.gui.main_window : GTK_WIDGET (uzbl.gui.plug);
+#else
+    GtkWidget *widget = uzbl.gui.main_window;
+#endif
 
     gboolean parsed = FALSE;
 
